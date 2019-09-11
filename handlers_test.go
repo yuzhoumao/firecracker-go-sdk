@@ -581,12 +581,12 @@ func TestHandlers(t *testing.T) {
 				},
 			},
 			Config: Config{
-				NetworkInterfaces: []NetworkInterface{{
-					StaticConfiguration: &StaticNetworkConfiguration{
+				NetworkInterfaces: []NetworkInterface{
+					{
 						MacAddress:  "macaddress",
 						HostDevName: "host",
 					},
-				}},
+				},
 			},
 		},
 		{

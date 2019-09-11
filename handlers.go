@@ -30,12 +30,9 @@ const (
 	AddVsocksHandlerName               = "fcinit.AddVsocks"
 	SetMetadataHandlerName             = "fcinit.SetMetadata"
 	LinkFilesToRootFSHandlerName       = "fcinit.LinkFilesToRootFS"
-	SetupNetworkHandlerName            = "fcinit.SetupNetwork"
-	SetupKernelArgsHandlerName         = "fcinit.SetupKernelArgs"
 
-	ValidateCfgHandlerName        = "validate.Cfg"
-	ValidateJailerCfgHandlerName  = "validate.JailerCfg"
-	ValidateNetworkCfgHandlerName = "validate.NetworkCfg"
+	ValidateCfgHandlerName       = "validate.Cfg"
+	ValidateJailerCfgHandlerName = "validate.JailerCfg"
 )
 
 // HandlersAdapter is an interface used to modify a given set of handlers.
@@ -99,13 +96,6 @@ var JailerConfigValidationHandler = Handler{
 		}
 
 		return nil
-	},
-}
-
-var NetworkConfigValidationHandler = Handler{
-	Name: ValidateNetworkCfgHandlerName,
-	Fn: func(ctx context.Context, m *Machine) error {
-		return m.Cfg.ValidateNetwork()
 	},
 }
 
@@ -183,31 +173,12 @@ var AttachDrivesHandler = Handler{
 	},
 }
 
-// CreateNetworkInterfacesHandler is a named handler that registers network
-// interfaces with the Firecracker VMM.
+// CreateNetworkInterfacesHandler is a named handler that sets up network
+// interfaces to the firecracker process.
 var CreateNetworkInterfacesHandler = Handler{
 	Name: CreateNetworkInterfacesHandlerName,
 	Fn: func(ctx context.Context, m *Machine) error {
 		return m.createNetworkInterfaces(ctx, m.Cfg.NetworkInterfaces...)
-	},
-}
-
-// SetupNetworkHandler is a named handler that will setup the network namespace
-// and network interface configuration prior to the Firecracker VMM starting.
-var SetupNetworkHandler = Handler{
-	Name: SetupNetworkHandlerName,
-	Fn: func(ctx context.Context, m *Machine) error {
-		return m.setupNetwork(ctx)
-	},
-}
-
-// SetupKernelArgsHandler is a named handler that will update any kernel boot
-// args being provided to the VM based on the other configuration provided, if
-// needed.
-var SetupKernelArgsHandler = Handler{
-	Name: SetupKernelArgsHandlerName,
-	Fn: func(ctx context.Context, m *Machine) error {
-		return m.setupKernelArgs(ctx)
 	},
 }
 
@@ -232,8 +203,6 @@ func NewSetMetadataHandler(metadata interface{}) Handler {
 }
 
 var defaultFcInitHandlerList = HandlerList{}.Append(
-	SetupNetworkHandler,
-	SetupKernelArgsHandler,
 	StartVMMHandler,
 	CreateLogFilesHandler,
 	BootstrapLoggingHandler,
@@ -244,13 +213,8 @@ var defaultFcInitHandlerList = HandlerList{}.Append(
 	AddVsocksHandler,
 )
 
-var defaultValidationHandlerList = HandlerList{}.Append(
-	NetworkConfigValidationHandler,
-)
-
 var defaultHandlers = Handlers{
-	Validation: defaultValidationHandlerList,
-	FcInit:     defaultFcInitHandlerList,
+	FcInit: defaultFcInitHandlerList,
 }
 
 // Handler represents a named handler that contains a name and a function which
